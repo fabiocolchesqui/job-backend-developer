@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+			                     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<http auto-config="true">
+		<intercept-url pattern="/" access="permitAll"></intercept-url>
+		<intercept-url pattern="/app/authentication" access="hasRole('ADMIN')"></intercept-url>
+		<form-login username-parameter="j_username"
+			password-parameter="j_password" login-page="/views/login.html"
+			authentication-success-handler-ref="ajaxAuthenticationSuccessHandler"
+			authentication-failure-handler-ref="ajaxAuthenticationFailureHandler"
+			always-use-default-target="true" default-target-url="/"
+			login-processing-url="/app/authentication"
+			authentication-failure-url="/views/error.html?loginError=true"></form-login>
+		<session-management session-fixation-protection="migrateSession">
+			<concurrency-control max-sessions="1"
+				error-if-maximum-exceeded="true" session-registry-alias="sessionRegistry" />
+		</session-management>
+		<csrf disabled="true" />
+		<logout logout-url="/app/logout" success-handler-ref="ajaxLogoutSuccessHandler"
+			delete-cookies="JSESSIONID" />
+	</http>
+
+	<authentication-manager>
+		<authentication-provider ref="customAuthenticationProvider" />
+	</authentication-manager>
+
+</beans:beans>
