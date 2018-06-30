@@ -1,57 +1,59 @@
 # Intelipost: Teste prático para Backend Developer
 
-Este é o teste usado por nós aqui da [Intelipost](http://www.intelipost.com.br) para avaliar tecnicamente os candidatos a nossas vagas de Backend. Se você estiver participando de um processo seletivo para nossa equipe, certamente em algum momento receberá este link, mas caso você tenha chego aqui "por acaso", sinta-se convidado a desenvolver nosso teste e enviar uma mensagem para nós nos e-mails `stefan.rehm@intelipost.com.br` e `gustavo.hideyuki@intelipost.com.br`.
+### Descrição do Desafio e resolução técnica
 
-Aqui na Intelipost nós aplicamos este mesmo teste para as vagas em todos os níveis, ou seja, um candidato a uma vaga de backend júnior fará o mesmo teste de um outro candidato a uma vaga de backend sênior, mudando obviamente o nosso critério de avaliação do resultado do teste. 
+O projeto utiliza Java 8, Spring Boot, Spring MVC, H2 Database Engine, Hibernate.
 
-Nós fazemos isso esperando que as pessoas mais iniciantes entendam qual o modelo de profissional que temos por aqui e que buscamos para o nosso time. Portanto, se você estiver se candidatando a uma vaga mais iniciante, não se assuste, e faça o melhor que você puder!
+A solução para realização de um sistema de login:
 
-## Instruções
+Foi utilizado Spring Security com autenticação por banco de dados (H2 em memória).
+Para que fosse possível realizar testes foi descartado a utilização de criptografia na senha do usuário.
 
-Você deverá criar um `fork` deste projeto, e desenvolver em cima do seu fork. Use o *README* principal do seu repositório para nos contar como foi resolver seu teste, as decisões tomadas, como você organizou e separou seu código, e principalmente as instruções de como rodar seu projeto, afinal a primeira pessoa que irá rodar seu projeto será um programador frontend de nossa equipe, e se você conseguir explicar para ele como fazer isso, você já começou bem!
+A solução, via aplicação, para melhorar o desempenho de conexão simultânea foi garantir que cada usuário tivesse apenas umas única sessão ativa, para isso, foi adicionado um SessionRegister que avalia se um usuário se encontra logado;
+Também foi configurado no Spring Security as questões de gerenciamento de sessão de cada login efetuado e também o gerenciamento de cookies e JSESSIONID;
 
-Lembre-se que este é um teste técnico e não um concurso público, portanto, não existe apenas uma resposta correta. Mostre que você é bom e nos impressione, mas não esqueça do objetivo do projeto. 
+Foi adicionado ao container um timeout para inatividade;
 
-Nós não definimos um tempo limite para resolução deste teste, o que vale para nós e o resultado final e a evolução da criação do projeto até se atingir este resultado, mas acreditamos que este desafio pode ser resolvido em cerca de 16 horas de codificação.
+Para o JPA foi utilizado Hibernate, porém, visando a melhoria da conexão seria necessário adicionar um pool de conexão e gerenciamento de cache. A sugestão seria utilizar HikariCP;
 
-## Um pouco sobre a Intelipost
+Também visando melhorias na performance da aplicação, seria necessário utilizar um load balance escalável após detectar overload. Cada ciclo de amostragem seria validado após alguns stress testes com JMeter para determinar gargalos e assim verificar a melhor abordagem. 
 
-A Intelipost é uma startup de tecnologia que está revolucionando a logística no Brasil, um mercado de R$ 300B por ano com muitas ineficiências e desafios. Temos um sistema inovador que gerencia a logística para empresas do e-commerce. Já recebemos R$11 milhões de investimento até o momento, e em pouquissimo tempo já estamos colhendo grandes resultados: Em 2016 fomos selecionados como uma empresa [Promessas Endeavor](https://ecommercenews.com.br/noticias/parcerias-comerciais/intelipost-e-selecionada-pelo-promessas-endeavor/), também [ganhamos a competição IBM Smartcamp](https://www.ibm.com/blogs/robertoa/2016/11/intelipost-e-nazar-vencem-o-ibm-smartcamp-brasil-2016/), com foco de Big Data e data analysis, o que nos rendeu a [realização de um Hackathon sobre Blockchain junto a IBM](https://www.ibm.com/blogs/robertoa/2017/09/intelipost-e-ibm-realizam-o-primeiro-hackathon-de-blockchain-em-startup-do-brasil/), e em 2017 [fomos selecionados pela Oracle para sermos acelerados por eles no programa Oracle Startup Cloud Accelerator](https://www.oracle.com/br/corporate/pressrelease/oracle-anuncia-startups-selecionadas-programa-oracle-startup-cloud-accelerator-sao-paulo-20170804.html).
+Outra sugestão seria também utilizar a aplicação container, Docker / Kubernetes.
 
-Tecnicamente, o nosso maior desafio hoje é estar preparado para atender a todos os nossos clientes, que além de muitos, são grandes em número de requisições (Americanas, Submarino, Shoptime, Lojas Renner, Boticário, Livraria Cultura, Magazine Luize, etc), totalizando mais de meio bilhão de requisições por mês.
+### Banco de dados
 
-Para isso, organizamos nosso sistema em micro serviços na AWS com Docker e Kubernetes, utilizando Java 8, Spring 4 (principalmente spring-boot), PostgreSQL, ElasticSearch e Redis. Temos um frontend para acesso dos clientes desenvolvido Vue.JS e mobile apps utilizando o framework Ionic.
+Banco de dados H2 Database engine
 
-## O desafio
+Foi utilizado H2 em memória; Também foi adicionado ao projeto um script default que insere alguns usuários na tabela 'credential';
+** Para realizar os testes, por favor, verifique os inserts disponíveis no arquivo data.sql na pasta Resources
 
-Como você pode ver, nosso maior desafio está na manutenção e otimização de aplicações que estejam prontas para atender um altíssimo volume de dados e transações, por este motivo, todos os membros da nossa equipe estão altamente comprometidos com estes objetivos, de robustez, escalabilidade e performance, e é exatamente isso que esperamos de você através da resolução destes dois desafios:
+### Frontend
 
-1) Imagine que hoje tenhamos um sistema de login e perfis de usuários. O sistema conta com mais de 10 milhões de usuários, sendo que temos um acesso concorrente de cerca de 5 mil usuários. Hoje a tela inicial do sistema se encontra muito lenta. Nessa tela é feita uma consulta no banco de dados para pegar as informações do usuário e exibi-las de forma personalizada. Quando há um pico de logins simultâneos, o carregamento desta tela fica demasiadamente lento. Na sua visão, como poderíamos iniciar a busca pelo problema, e que tipo de melhoria poderia ser feita?
+Para apresentar uma solução de demostração de login/logout, foi criado um frontend com AngularJS que possibilita simular o login de um usuário. O login é feito por Spring Security com autenticação via banco de dados.
+A classe Controller responsável por retornar o usuário da sessão também verifica se o usuário atual está logado. O sistema evita navegação de um UserAnonymous;
 
-2) Com base no problema anterior, gostaríamos que você codificasse um novo sistema de login para muitos usuários simultâneos e carregamento da tela inicial. Lembre-se que é um sistema web então teremos conteúdo estático e dinâmico. Leve em consideração também que na empresa existe um outro sistema que também requisitará os dados dos usuários, portanto, este sistema deve expor as informações para este outro sistema de alguma maneira.
+### Performance Frontend
 
-### O que nós esperamos do seu teste
+Para apresentar melhoria nas requisições e callback no frontend, a aplicação utiliza 'compression / gzip';
+Um sugestão seria uma abordagem loadOnDemand por requisição, e assim, evitar adições de scripts;
+Outro ponto a considerar seria minificar os arquivos de frontview; 
 
-* O código deverá ser hospedado em algum repositório público. Diversos quesitos serão avaliados aqui, como organização do código, sequencialidade de commits, nomeação de classes e métodos, etc.
-* O código deverá estar pronto para ser executado e testado, portanto, caso exista algum requisito, este deve estar completamente documentado no README do seu projeto.
-* Esperamos também alguma explicação sobre a solução, que pode ser em comentários no código, um texto escrito ou até um vídeo narrativo explicando a abordagem utilizada. 
-* Você deverá utilizar a nossa stack de tecnologias descritas no início deste documento (Java 8 + Spring boot + Spring MVC).
+### Execução
 
-### O que nós ficaríamos felizes de ver em seu teste
+O projeto pode ser acessado em http://localhost:8080/ 
+Para o H2, acessar: http://localhost:8080/h2-console
 
-* Testes
-* Processo de build e deploy documentado
-* Ver o código rodando live (em qualquer serviço por aí)
+### Testes
 
-### O que nós não gostaríamos
+Foi criado um teste que verifica o status de login do Spring Security;
+Não foram realizandos testes de integração da Controller class;
 
-* Descobrir que não foi você quem fez seu teste
-* Ver commits grandes, sem muita explicação nas mensagens em seu repositório 
+### Resultado Final
 
-## O que avaliaremos de seu teste
+O resultado final demostrou que a aplicação pode evoluir em questão de performance e segurança, adotando algumas novas medidas preventivas, estas seriam válidas para um resultado, porém, tratando-se de uma prova de conceito, o esperado foi validado.
 
-* Histórico de commits do git
-* As instruções de como rodar o projeto
-* Organização, semântica, estrutura, legibilidade, manutenibilidade do seu código
-* Alcance dos objetivos propostos
-* Escalabilidade da solução adotada 
+
+
+
+
+
