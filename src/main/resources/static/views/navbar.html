@@ -1,0 +1,11 @@
+<nav class="navbar navbar-fixed-top navbar-inverse ">
+    <div class="container">
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li ng-show="!isAuthenticated"><a  ng-click="home.loginModal()" href="" >Login</a></li>
+                <li ng-show="isAuthenticated"><a  ng-click="home.logoutModal()" href="" >Logout</a></li>
+            </ul>
+        </div>
+        </div>
+</nav>
